@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CarouselForge — Paste text, get a LinkedIn carousel PDF in 60 seconds</title>
+<meta name="description" content="Turn plain text into a polished LinkedIn or Instagram carousel PDF in under a minute. No design skills, no subscription. One-time ₹199 lifetime unlock.">
+<meta property="og:title" content="CarouselForge — text to carousel in 60 seconds">
+<meta property="og:description" content="Paste your post, pick a style, download a swipe-ready PDF. Lifetime unlock for less than one month of the tools you're using now.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Public+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#EDEFF3; --panel:#FFFFFF; --ink:#171B26; --muted:#5A6172;
+  --line:#DDE1E8; --accent:#0F6B6B; --accent-ink:#0A4A4A; --gold:#FFC940;
+  --radius:14px;
+}
+*{box-sizing:border-box; margin:0}
+html,body{height:100%}
+body{font-family:'Public Sans',system-ui,sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased}
+h1,h2,h3,.display{font-family:'Bricolage Grotesque','Public Sans',sans-serif}
+header{display:flex; align-items:center; justify-content:space-between; padding:14px 22px; border-bottom:1px solid var(--line); background:var(--panel)}
+.logo{font-family:'Bricolage Grotesque'; font-weight:800; font-size:20px; letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+.hdr-actions{display:flex; gap:10px; align-items:center}
+.btn{border:0; cursor:pointer; font:inherit; font-weight:700; border-radius:10px; padding:10px 16px; transition:transform .08s ease, background .15s}
+.btn:active{transform:scale(.97)}
+.btn-pro{background:var(--ink); color:#fff}
+.btn-pro:hover{background:#000}
+.btn-ghost{background:transparent; color:var(--muted); border:1px solid var(--line)}
+.btn-accent{background:var(--accent); color:#fff}
+.btn-accent:hover{background:var(--accent-ink)}
+.pro-badge{background:var(--gold); color:#4a3a00; font-size:11px; font-weight:800; padding:3px 8px; border-radius:99px; letter-spacing:.04em}
+main{display:grid; grid-template-columns:minmax(340px,460px) 1fr; gap:0; min-height:calc(100vh - 61px)}
+.pane{padding:22px}
+.pane-left{border-right:1px solid var(--line); background:var(--panel); overflow-y:auto}
+.pane-right{display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:34px}
+label.field{display:block; font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin:18px 0 6px}
+textarea{width:100%; min-height:220px; resize:vertical; border:1px solid var(--line); border-radius:var(--radius); padding:14px; font:14px/1.55 'Public Sans'; color:var(--ink); background:#FBFCFE}
+textarea:focus{outline:2px solid var(--accent); border-color:transparent}
+input[type=text]{width:100%; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font:14px 'Public Sans'; background:#FBFCFE}
+input[type=text]:focus{outline:2px solid var(--accent); border-color:transparent}
+.hint{font-size:12px; color:var(--muted); margin-top:6px}
+.row{display:flex; gap:10px}
+.row > *{flex:1}
+.tpl-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.tpl{position:relative; border:2px solid var(--line); border-radius:10px; padding:0; cursor:pointer; overflow:hidden; aspect-ratio:1; background:none}
+.tpl.sel{border-color:var(--accent); box-shadow:0 0 0 2px rgba(15,107,107,.2)}
+.tpl canvas{width:100%; height:100%; display:block}
+.tpl .lock{position:absolute; top:5px; right:5px; background:var(--gold); color:#4a3a00; font-size:9px; font-weight:800; padding:2px 6px; border-radius:99px}
+.tpl .tname{position:absolute; left:0; right:0; bottom:0; font-size:10px; font-weight:700; color:#fff; background:rgba(0,0,0,.45); padding:3px 6px; text-align:left}
+.seg{display:flex; border:1px solid var(--line); border-radius:10px; overflow:hidden}
+.seg button{flex:1; border:0; background:#FBFCFE; padding:9px; font:12px/1 'Public Sans'; font-weight:700; color:var(--muted); cursor:pointer}
+.seg button.sel{background:var(--accent); color:#fff}
+.swatches{display:flex; gap:8px; flex-wrap:wrap}
+.sw{width:28px; height:28px; border-radius:99px; border:2px solid transparent; cursor:pointer; padding:0}
+.sw.sel{border-color:var(--ink); box-shadow:0 0 0 2px #fff inset}
+.stage{width:min(430px, 88vw)}
+.stage-canvas{width:100%; border-radius:16px; box-shadow:0 18px 50px rgba(23,27,38,.18); display:block; background:#fff}
+.deck-nav{display:flex; align-items:center; justify-content:center; gap:14px; margin:16px 0 6px}
+.deck-nav button{width:38px; height:38px; border-radius:99px; border:1px solid var(--line); background:var(--panel); font-size:16px; cursor:pointer; color:var(--ink)}
+.dots{display:flex; gap:6px}
+.dot{width:8px; height:8px; border-radius:99px; background:#C6CBD4; border:0; padding:0; cursor:pointer}
+.dot.sel{background:var(--accent); width:20px; transition:width .15s}
+.export-bar{display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; justify-content:center}
+.freemark{font-size:12px; color:var(--muted); margin-top:10px; text-align:center}
+.freemark b{color:var(--ink)}
+a.link{color:var(--accent); font-weight:700; cursor:pointer; text-decoration:underline}
+/* modal */
+.modal-bg{position:fixed; inset:0; background:rgba(16,20,30,.55); display:none; align-items:center; justify-content:center; padding:20px; z-index:50}
+.modal-bg.open{display:flex}
+.modal{background:#fff; border-radius:18px; max-width:440px; width:100%; padding:28px}
+.modal h2{font-size:26px; letter-spacing:-.02em; margin-bottom:4px}
+.price{font-family:'Bricolage Grotesque'; font-size:40px; font-weight:800; margin:10px 0 2px}
+.price small{font-size:14px; color:var(--muted); font-weight:500}
+.strike{color:var(--muted); text-decoration:line-through; font-size:14px}
+.perks{list-style:none; margin:14px 0 18px; font-size:14px}
+.perks li{padding:6px 0 6px 26px; position:relative}
+.perks li::before{content:''; position:absolute; left:0; top:9px; width:14px; height:14px; border-radius:99px; background:var(--accent); mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/contain no-repeat; -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z'/%3E%3C/svg%3E") center/contain no-repeat}
+.modal .close{position:absolute}
+.divider{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:12px; margin:16px 0}
+.divider::before,.divider::after{content:''; flex:1; height:1px; background:var(--line)}
+.toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--ink); color:#fff; padding:12px 20px; border-radius:12px; font-size:14px; font-weight:600; opacity:0; pointer-events:none; transition:opacity .25s; z-index:60}
+.toast.show{opacity:1}
+@media (max-width:860px){
+  main{grid-template-columns:1fr}
+  .pane-left{border-right:0; border-bottom:1px solid var(--line)}
+  .pane-right{padding:22px 12px 60px}
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Carousel<span>Forge</span></div>
+  <div class="hdr-actions">
+    <span id="proBadge" class="pro-badge" hidden>PRO — LIFETIME</span>
+    <button class="btn btn-ghost" id="btnCode">Enter unlock code</button>
+    <button class="btn btn-pro" id="btnGoPro">Go Pro — ₹199 once</button>
+  </div>
+</header>
+
+<main>
+  <section class="pane pane-left" aria-label="Editor">
+    <h1 style="font-size:22px; letter-spacing:-.02em">Paste text. Get a carousel.</h1>
+    <p class="hint" style="margin-top:4px">One slide per paragraph. First line of each paragraph becomes the slide heading. Separate slides with a blank line or <b>---</b>.</p>
+
+    <label class="field" for="txt">Your content</label>
+    <textarea id="txt" spellcheck="false"></textarea>
+
+    <label class="field">Template</label>
+    <div class="tpl-grid" id="tplGrid"></div>
+
+    <label class="field">Accent color</label>
+    <div class="swatches" id="swatches"></div>
+
+    <div class="row">
+      <div>
+        <label class="field">Size</label>
+        <div class="seg" id="sizeSeg">
+          <button data-size="sq" class="sel">Square 1:1</button>
+          <button data-size="pt">Portrait 4:5</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label class="field" for="author">Your name</label>
+        <input type="text" id="author" placeholder="Priya Sharma">
+      </div>
+      <div>
+        <label class="field" for="handle">Handle</label>
+        <input type="text" id="handle" placeholder="@priyabuilds">
+      </div>
+    </div>
+  </section>
+
+  <section class="pane pane-right" aria-label="Preview and export">
+    <div class="stage">
+      <canvas id="stage" class="stage-canvas" width="1080" height="1080" aria-label="Slide preview"></canvas>
+      <div class="deck-nav">
+        <button id="prev" aria-label="Previous slide">←</button>
+        <div class="dots" id="dots"></div>
+        <button id="next" aria-label="Next slide">→</button>
+      </div>
+      <div class="export-bar">
+        <button class="btn btn-accent" id="btnPDF">Download PDF</button>
+        <button class="btn btn-ghost" id="btnPNG">Download PNGs (Pro)</button>
+      </div>
+      <p class="freemark" id="freemark">Free plan adds a small watermark. <a class="link" id="linkPro">Remove it forever for ₹199</a> — less than one month of any subscription tool.</p>
+    </div>
+  </section>
+</main>
+
+<div class="modal-bg" id="proModal" role="dialog" aria-modal="true" aria-labelledby="proTitle">
+  <div class="modal">
+    <h2 id="proTitle">Lifetime Pro</h2>
+    <p class="hint">Pay once. Own it forever. No subscription.</p>
+    <div class="price">₹199 <small>one-time</small> &nbsp;<span class="strike">₹799/mo elsewhere</span></div>
+    <ul class="perks">
+      <li>No watermark on any export</li>
+      <li>All 5 premium templates</li>
+      <li>PNG export for Instagram</li>
+      <li>Every future template, free</li>
+    </ul>
+    <a class="btn btn-accent" id="payBtn" style="display:block; text-align:center; text-decoration:none" href="#" rel="noopener">Pay ₹199 with UPI / Card</a>
+    <div class="divider">already paid?</div>
+    <div class="row">
+      <input type="text" id="codeInput" placeholder="Unlock code from payment receipt">
+      <button class="btn btn-pro" id="codeApply" style="flex:0 0 auto">Unlock</button>
+    </div>
+    <p class="hint" style="margin-top:14px; text-align:center"><a class="link" id="modalClose">Not now</a></p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ================= CONFIG — edit these two lines only ================= */
+const RAZORPAY_LINK = "https://rzp.io/l/REPLACE_ME";   // your Razorpay Payment Link
+const UNLOCK_CODE   = "CF-PRO-9V2K4";                  // code shown to buyers / in redirect
+/* ====================================================================== */
+
+const DEMO = `5 lessons from my first year of freelancing
+Nobody teaches you this in college. I learned it the hard way so you don't have to.
+
+Lesson 1: Charge for outcomes
+Clients don't pay for hours. They pay for problems that disappear. Price the result, not your time.
+
+Lesson 2: Follow up twice
+80% of my closed deals came from the second follow-up. Silence is not a no.
+
+Lesson 3: Portfolio beats resume
+One live project convinced more clients than ten bullet points ever did.
+
+Lesson 4: Fire bad clients early
+A bad client costs you the energy you need for three good ones.
+
+Follow for more
+I share one practical freelancing lesson every week. Save this for later.`;
+
+const $ = s => document.querySelector(s);
+const stage = $("#stage"), ctx = stage.getContext("2d");
+
+const ACCENTS = ["#0F6B6B","#E8542F","#2E5BFF","#7C3AED","#C2185B","#111111"];
+let state = {
+  text: DEMO, tpl: "bold", accent: ACCENTS[0], size: "sq",
+  author: "", handle: "", idx: 0,
+  pro: localStorage.getItem("cf_pro") === "1"
+};
+
+/* ---------- parsing ---------- */
+function parseSlides(text){
+  const blocks = text.split(/\n\s*\n|^---$/m).map(b=>b.trim()).filter(Boolean);
+  return blocks.map(b=>{
+    const lines = b.split("\n").map(l=>l.trim()).filter(Boolean);
+    return { title: lines[0]||"", body: lines.slice(1).join(" ") };
+  });
+}
+
+/* ---------- canvas helpers ---------- */
+function wrap(c, text, maxW){
+  const words = text.split(/\s+/), lines=[]; let line="";
+  for(const w of words){
+    const t = line ? line+" "+w : w;
+    if(c.measureText(t).width > maxW && line){ lines.push(line); line = w; }
+    else line = t;
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+function drawText(c, text, x, y, maxW, lh, maxLines){
+  const lines = wrap(c, text, maxW).slice(0, maxLines);
+  lines.forEach((l,i)=>c.fillText(l, x, y+i*lh));
+  return y + lines.length*lh;
+}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+
+/* ---------- templates ---------- */
+function shade(hex, f){ // f<0 darken, >0 lighten
+  const n=parseInt(hex.slice(1),16); let r=n>>16,g=(n>>8)&255,b=n&255;
+  const t=f<0?0:255, a=Math.abs(f);
+  r=Math.round(r+(t-r)*a); g=Math.round(g+(t-g)*a); b=Math.round(b+(t-b)*a);
+  return `rgb(${r},${g},${b})`;
+}
+const TEMPLATES = {
+  bold: { name:"Bold Type", pro:false,
+    draw(c,s,i,n,o){
+      c.fillStyle="#14181F"; c.fillRect(0,0,o.w,o.h);
+      c.fillStyle=o.accent; c.fillRect(0,0,o.w,14);
+      c.fillStyle=o.accent; c.font=`700 ${o.w*0.033}px 'Public Sans'`;
+      c.fillText(String(i+1).padStart(2,"0")+" / "+String(n).padStart(2,"0"), o.pad, o.pad+o.w*0.03);
+      c.fillStyle="#FFFFFF"; c.font=`800 ${o.w*(i===0?0.085:0.068)}px 'Bricolage Grotesque'`;
+      const yEnd = drawText(c, s.title, o.pad, o.h*0.32, o.w-2*o.pad, o.w*(i===0?0.1:0.082), 4);
+      if(s.body){ c.fillStyle="#B9C0CC"; c.font=`400 ${o.w*0.037}px 'Public Sans'`;
+        drawText(c, s.body, o.pad, yEnd+o.w*0.05, o.w-2*o.pad, o.w*0.055, 8); }
+      footer(c,o,i,n,"#7E8698","#FFFFFF");
+    }},
+  gradient: { name:"Gradient Pop", pro:false,
+    draw(c,s,i,n,o){
+      const g=c.createLinearGradient(0,0,o.w,o.h);
+      g.addColorStop(0, shade(o.accent,.15)); g.addColorStop(1, shade(o.accent,-.45));
+      c.fillStyle=g; c.fillRect(0,0,o.w,o.h);
+      c.fillStyle="rgba(255,255,255,.16)"; rr(c,o.pad,o.pad,o.w*0.17,o.w*0.062,99); c.fill();
+      c.fillStyle="#fff"; c.font=`700 ${o.w*0.03}px 'Public Sans'`;
+      c.fillText(`${i+1} of ${n}`, o.pad+o.w*0.035, o.pad+o.w*0.043);
+      c.font=`800 ${o.w*(i===0?0.082:0.066)}px 'Bricolage Grotesque'`;
+      const yEnd=drawText(c,s.title,o.pad,o.h*0.36,o.w-2*o.pad,o.w*(i===0?0.098:0.08),4);
+      if(s.body){ c.fillStyle="rgba(255,255,255,.9)"; c.font=`400 ${o.w*0.037}px 'Public Sans'`;
+        drawText(c,s.body,o.pad,yEnd+o.w*0.05,o.w-2*o.pad,o.w*0.055,8); }
+      footer(c,o,i,n,"rgba(255,255,255,.75)","#FFFFFF");
+    }},
+  paper: { name:"Minimal Paper", pro:true,
+    draw(c,s,i,n,o){
+      c.fillStyle="#F7F5F0"; c.fillRect(0,0,o.w,o.h);
+      c.fillStyle=o.accent; c.fillRect(o.pad,o.pad,o.w*0.09,10);
+      c.fillStyle="#8A8578"; c.font=`700 ${o.w*0.028}px 'Public Sans'`;
+      c.fillText(String(i+1).padStart(2,"0"), o.w-o.pad-o.w*0.06, o.pad+o.w*0.02);
+      c.fillStyle="#1E1C17"; c.font=`600 ${o.w*(i===0?0.078:0.062)}px 'Bricolage Grotesque'`;
+      const yEnd=drawText(c,s.title,o.pad,o.h*0.34,o.w-2*o.pad,o.w*(i===0?0.094:0.076),4);
+      if(s.body){ c.fillStyle="#55524A"; c.font=`400 ${o.w*0.036}px 'Public Sans'`;
+        drawText(c,s.body,o.pad,yEnd+o.w*0.05,o.w-2*o.pad,o.w*0.056,8); }
+      footer(c,o,i,n,"#8A8578","#1E1C17");
+    }},
+  neon: { name:"Neon Grid", pro:true,
+    draw(c,s,i,n,o){
+      c.fillStyle="#0B0E14"; c.fillRect(0,0,o.w,o.h);
+      c.strokeStyle="rgba(255,255,255,.06)"; c.lineWidth=1;
+      for(let x=0;x<=o.w;x+=o.w/12){c.beginPath();c.moveTo(x,0);c.lineTo(x,o.h);c.stroke()}
+      for(let y=0;y<=o.h;y+=o.w/12){c.beginPath();c.moveTo(0,y);c.lineTo(o.w,y);c.stroke()}
+      c.fillStyle=o.accent; c.font=`700 ${o.w*0.03}px 'Public Sans'`;
+      c.fillText("● "+String(i+1).padStart(2,"0")+"/"+String(n).padStart(2,"0"), o.pad, o.pad+o.w*0.025);
+      c.shadowColor=o.accent; c.shadowBlur=28;
+      c.fillStyle="#FFFFFF"; c.font=`800 ${o.w*(i===0?0.082:0.066)}px 'Bricolage Grotesque'`;
+      const yEnd=drawText(c,s.title,o.pad,o.h*0.34,o.w-2*o.pad,o.w*(i===0?0.098:0.08),4);
+      c.shadowBlur=0;
+      if(s.body){ c.fillStyle="#A9B2C3"; c.font=`400 ${o.w*0.037}px 'Public Sans'`;
+        drawText(c,s.body,o.pad,yEnd+o.w*0.05,o.w-2*o.pad,o.w*0.055,8); }
+      footer(c,o,i,n,"#6B7488","#FFFFFF");
+    }},
+  clean: { name:"Corporate Clean", pro:true,
+    draw(c,s,i,n,o){
+      c.fillStyle="#FFFFFF"; c.fillRect(0,0,o.w,o.h);
+      c.fillStyle=o.accent; c.fillRect(0,0,o.w,o.h*0.012);
+      c.fillStyle=shade(o.accent,.88); rr(c,o.pad,o.pad, o.w*0.2, o.w*0.06, 10); c.fill();
+      c.fillStyle=o.accent; c.font=`700 ${o.w*0.028}px 'Public Sans'`;
+      c.fillText(`Slide ${i+1}/${n}`, o.pad+o.w*0.03, o.pad+o.w*0.041);
+      c.fillStyle="#10141C"; c.font=`700 ${o.w*(i===0?0.075:0.06)}px 'Bricolage Grotesque'`;
+      const yEnd=drawText(c,s.title,o.pad,o.h*0.33,o.w-2*o.pad,o.w*(i===0?0.09:0.074),4);
+      c.fillStyle=o.accent; c.fillRect(o.pad, yEnd+o.w*0.012, o.w*0.07, 6);
+      if(s.body){ c.fillStyle="#454B58"; c.font=`400 ${o.w*0.036}px 'Public Sans'`;
+        drawText(c,s.body,o.pad,yEnd+o.w*0.06,o.w-2*o.pad,o.w*0.056,8); }
+      footer(c,o,i,n,"#9AA0AC","#10141C");
+    }}
+};
+function footer(c,o,i,n,mutedCol,inkCol){
+  const y=o.h-o.pad*0.9;
+  if(state.author){ c.fillStyle=inkCol; c.font=`700 ${o.w*0.03}px 'Public Sans'`; c.fillText(state.author,o.pad,y); }
+  if(state.handle){ c.fillStyle=mutedCol; c.font=`400 ${o.w*0.027}px 'Public Sans'`; c.fillText(state.handle,o.pad,y+o.w*0.038); }
+  if(i<n-1){ c.fillStyle=mutedCol; c.font=`700 ${o.w*0.03}px 'Public Sans'`;
+    const t="swipe →"; c.fillText(t, o.w-o.pad-c.measureText(t).width, y); }
+  if(!state.pro){ c.fillStyle=mutedCol; c.globalAlpha=.75; c.font=`600 ${o.w*0.022}px 'Public Sans'`;
+    const t="made with carouselforge"; c.fillText(t, o.w-o.pad-c.measureText(t).width, o.h-o.pad*0.35); c.globalAlpha=1; }
+}
+
+/* ---------- render ---------- */
+function dims(){ return state.size==="sq" ? {w:1080,h:1080} : {w:1080,h:1350}; }
+function renderSlide(canvas, i){
+  const {w,h}=dims(); canvas.width=w; canvas.height=h;
+  const c=canvas.getContext("2d");
+  const slides=parseSlides(state.text);
+  if(!slides.length){ c.fillStyle="#fff"; c.fillRect(0,0,w,h); return 0; }
+  const s=slides[Math.min(i,slides.length-1)];
+  TEMPLATES[state.tpl].draw(c, s, Math.min(i,slides.length-1), slides.length, {w,h,pad:w*0.09,accent:state.accent});
+  return slides.length;
+}
+function render(){
+  const n = renderSlide(stage, state.idx);
+  state.idx = Math.min(state.idx, Math.max(0,n-1));
+  const dots=$("#dots"); dots.innerHTML="";
+  for(let i=0;i<n;i++){
+    const d=document.createElement("button"); d.className="dot"+(i===state.idx?" sel":"");
+    d.setAttribute("aria-label","Slide "+(i+1));
+    d.onclick=()=>{state.idx=i; render()}; dots.appendChild(d);
+  }
+}
+
+/* ---------- template picker thumbs ---------- */
+function buildTplGrid(){
+  const g=$("#tplGrid"); g.innerHTML="";
+  Object.entries(TEMPLATES).forEach(([key,t])=>{
+    const b=document.createElement("button"); b.className="tpl"+(state.tpl===key?" sel":"");
+    const cv=document.createElement("canvas"); cv.width=240; cv.height=240;
+    t.draw(cv.getContext("2d"), {title:"Your headline", body:"Body text preview"}, 0, 5, {w:240,h:240,pad:24,accent:state.accent});
+    b.appendChild(cv);
+    if(t.pro && !state.pro){ const l=document.createElement("span"); l.className="lock"; l.textContent="PRO"; b.appendChild(l); }
+    const nm=document.createElement("span"); nm.className="tname"; nm.textContent=t.name; b.appendChild(nm);
+    b.onclick=()=>{
+      if(t.pro && !state.pro){ openPro(); return; }
+      state.tpl=key; buildTplGrid(); render();
+    };
+    g.appendChild(b);
+  });
+}
+function buildSwatches(){
+  const w=$("#swatches"); w.innerHTML="";
+  ACCENTS.forEach(hex=>{
+    const b=document.createElement("button"); b.className="sw"+(state.accent===hex?" sel":"");
+    b.style.background=hex; b.setAttribute("aria-label","Accent "+hex);
+    b.onclick=()=>{state.accent=hex; buildSwatches(); buildTplGrid(); render()};
+    w.appendChild(b);
+  });
+}
+
+/* ---------- export ---------- */
+async function exportPDF(){
+  const slides=parseSlides(state.text);
+  if(!slides.length){ toast("Add some text first"); return; }
+  toast("Building your PDF…");
+  const {w,h}=dims();
+  const pdf=new jspdf.jsPDF({unit:"px", format:[w,h], orientation: h>w?"portrait":"landscape", hotfixes:["px_scaling"]});
+  const cv=document.createElement("canvas");
+  for(let i=0;i<slides.length;i++){
+    renderSlide(cv,i);
+    if(i>0) pdf.addPage([w,h], h>w?"portrait":"landscape");
+    pdf.addImage(cv.toDataURL("image/jpeg",0.92),"JPEG",0,0,w,h);
+  }
+  pdf.save("carousel.pdf");
+  toast("PDF downloaded. Post it as a LinkedIn document.");
+}
+function exportPNGs(){
+  if(!state.pro){ openPro(); return; }
+  const slides=parseSlides(state.text);
+  if(!slides.length){ toast("Add some text first"); return; }
+  const cv=document.createElement("canvas");
+  slides.forEach((_,i)=>{
+    renderSlide(cv,i);
+    const a=document.createElement("a");
+    a.download=`slide-${String(i+1).padStart(2,"0")}.png`;
+    a.href=cv.toDataURL("image/png"); a.click();
+  });
+  toast(slides.length+" PNGs downloaded");
+}
+
+/* ---------- pro / unlock ---------- */
+function openPro(){ $("#payBtn").href=RAZORPAY_LINK; $("#proModal").classList.add("open"); $("#codeInput").focus(); }
+function closePro(){ $("#proModal").classList.remove("open"); }
+function activatePro(){
+  state.pro=true; localStorage.setItem("cf_pro","1");
+  $("#proBadge").hidden=false; $("#btnGoPro").hidden=true; $("#freemark").hidden=true;
+  $("#btnPNG").textContent="Download PNGs";
+  closePro(); buildTplGrid(); render(); toast("Pro unlocked. Watermark removed forever.");
+}
+function tryCode(code){
+  if((code||"").trim().toUpperCase()===UNLOCK_CODE){ activatePro(); return true; }
+  toast("That code didn't match. Check your payment receipt."); return false;
+}
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2600); }
+
+/* ---------- wire up ---------- */
+$("#txt").value=DEMO;
+$("#txt").addEventListener("input",e=>{state.text=e.target.value; render()});
+$("#author").addEventListener("input",e=>{state.author=e.target.value; render()});
+$("#handle").addEventListener("input",e=>{state.handle=e.target.value; render()});
+$("#sizeSeg").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  state.size=b.dataset.size;
+  [...$("#sizeSeg").children].forEach(x=>x.classList.toggle("sel",x===b));
+  render();
+});
+$("#prev").onclick=()=>{state.idx=Math.max(0,state.idx-1); render()};
+$("#next").onclick=()=>{const n=parseSlides(state.text).length; state.idx=Math.min(n-1,state.idx+1); render()};
+$("#btnPDF").onclick=exportPDF;
+$("#btnPNG").onclick=exportPNGs;
+$("#btnGoPro").onclick=openPro; $("#linkPro").onclick=openPro; $("#btnCode").onclick=openPro;
+$("#modalClose").onclick=closePro;
+$("#proModal").addEventListener("click",e=>{ if(e.target.id==="proModal") closePro(); });
+$("#codeApply").onclick=()=>tryCode($("#codeInput").value);
+$("#codeInput").addEventListener("keydown",e=>{ if(e.key==="Enter") tryCode(e.target.value); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePro(); });
+
+const params=new URLSearchParams(location.search);
+if(params.get("unlock")){ if(tryCode(params.get("unlock"))) history.replaceState({},"",location.pathname); }
+if(state.pro){ $("#proBadge").hidden=false; $("#btnGoPro").hidden=true; $("#freemark").hidden=true; $("#btnPNG").textContent="Download PNGs"; }
+
+buildTplGrid(); buildSwatches(); render();
+document.fonts.ready.then(()=>{ buildTplGrid(); render(); });
+</script>
+</body>
+</html>
